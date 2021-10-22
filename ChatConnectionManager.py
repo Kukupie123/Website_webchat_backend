@@ -16,7 +16,7 @@ class ChatConnectionManager:
         data2 = json.loads(s=data)
         action = data2["action"]
 
-        #CREATE ROOM
+        # CREATE ROOM
         if action == 'createRoom':
 
             # deny connection if already connected
@@ -39,3 +39,16 @@ class ChatConnectionManager:
             self.users.append(dic)
             # sending it back to client
             await client.send_text(jsonString), 200
+
+        elif action == 'message':
+            roomNumberTemp = -1
+            for user in self.users:
+                if user['userWebSocket'] == client:
+                    roomNumberTemp = user['roomNumber']
+                    break
+            if roomNumberTemp != -1:
+                message = data2['message']
+                for user in self.users:
+                    await user['userWebSocket'].send_text(message)
+            else:
+                client.send_text("room doesnt exist yet")
