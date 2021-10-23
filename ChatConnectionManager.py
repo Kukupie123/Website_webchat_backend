@@ -45,19 +45,27 @@ class ChatConnectionManager:
         elif action == 'message':
             # invalid data start
             roomNumberTemp = -1
+            senderName = ""
 
             # get room number of the sender
             for user in self.users:
                 if user['userWebSocket'] == client:
                     roomNumberTemp = user['roomNumber']
+                    senderName = user['userName']
                     break
             # continue this loop if roomNumberTemp is valid
-            if roomNumberTemp != -1:
+            if roomNumberTemp != -1 and senderName != "":
                 message = data2['message']
                 # for users who have same room number as the sender we are going to send the text
                 for user in self.users:
                     if user['roomNumber'] == roomNumberTemp:
-                        await user['userWebSocket'].send_text(message)
+                        sendDic = {
+                            "message": message,
+                            "senderName": senderName
+                        }
+
+                        jsonString = str(json.dumps(sendDic))
+                        await user['userWebSocket'].send_text(jsonString)
             else:
                 await client.send_text("room doesnt exist yet")
         elif action == 'join':
