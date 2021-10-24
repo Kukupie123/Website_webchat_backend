@@ -41,8 +41,6 @@ class ChatConnectionManager:
             # sending it back to client
             await client.send_text(jsonString)
 
-
-
         elif action == 'join':
             # deny connection if already connected
             for user in self.users:
@@ -66,19 +64,6 @@ class ChatConnectionManager:
             jsonString = str(json.dumps(sendDic))
             # sending it back to client
             await client.send_text(jsonString)
-
-            # broadcasting that the user has joined the room
-            message = " joined the room"
-            for user in self.users:
-                if user['roomNumber'] == roomNumber and user['userWebSocket'] != client:
-                    sendDic = {
-                        "message": message,
-                        "senderName": userName,
-                        "event": "messageEvent"
-                    }
-                    jsonString = str(json.dumps(sendDic))
-                    await user['userWebSocket'].send_text(jsonString)
-
 
         elif action == 'message':
             # invalid data start
