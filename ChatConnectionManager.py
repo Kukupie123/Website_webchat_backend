@@ -36,7 +36,8 @@ class ChatConnectionManager:
             sendDic = {
                 'roomNumber': oldRN,
                 'userName': userName,
-                'status code': 200
+                'status code': 200,
+                "event": "createRoomEvent"
             }
             jsonString = str(json.dumps(sendDic))
             # sending it back to client
@@ -61,7 +62,8 @@ class ChatConnectionManager:
                     if user['roomNumber'] == roomNumberTemp:
                         sendDic = {
                             "message": message,
-                            "senderName": senderName
+                            "senderName": senderName,
+                            "event": "messageEvent"
                         }
 
                         jsonString = str(json.dumps(sendDic))
@@ -69,7 +71,15 @@ class ChatConnectionManager:
             else:
                 await client.send_text("room doesnt exist yet")
         elif action == 'join':
-            roomNumber = data2['roomNumber']
+            # deny connection if already connected
             for user in self.users:
-                if user['roomNumber'] == roomNumber:
-                    await user
+                if user['userWebSocket'] == client:
+                    await client.send_text("Already connected")
+                    return
+
+            roomNumber = data2['roomNumber']
+            userName = data2['userName']
+            # adding user to list
+            dic = {'userWebSocket': client, 'roomNumber': roomNumber,
+                   'userName': userName}
+            self.users.append(dic)
