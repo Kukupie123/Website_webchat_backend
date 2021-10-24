@@ -1,8 +1,6 @@
 import json
 
-from fastapi import WebSocket, FastAPI
-from typing import List
-from CustomDictionary import CustomDictionary
+from fastapi import WebSocket
 
 
 class ChatConnectionManager:
@@ -43,6 +41,45 @@ class ChatConnectionManager:
             # sending it back to client
             await client.send_text(jsonString)
 
+
+
+        elif action == 'join':
+            # deny connection if already connected
+            for user in self.users:
+                if user['userWebSocket'] == client:
+                    await client.send_text("Already connected")
+                    return
+
+            roomNumber = data2['roomNumber']
+            userName = data2['userName']
+            # adding user to list
+            dic = {'userWebSocket': client, 'roomNumber': roomNumber,
+                   'userName': userName}
+            self.users.append(dic)
+
+            sendDic = {
+                'roomNumber': roomNumber,
+                'userName': userName,
+                'status code': 200,
+                "event": "joinedRoomEvent"
+            }
+            jsonString = str(json.dumps(sendDic))
+            # sending it back to client
+            await client.send_text(jsonString)
+
+            # broadcasting that the user has joined the room
+            message = " joined the room"
+            for user in self.users:
+                if user['roomNumber'] == roomNumber:
+                    sendDic = {
+                        "message": message,
+                        "senderName": userName,
+                        "event": "messageEvent"
+                    }
+                    jsonString = str(json.dumps(sendDic))
+                    await user['userWebSocket'].send_text(jsonString)
+
+
         elif action == 'message':
             # invalid data start
             roomNumberTemp = -1
@@ -70,16 +107,3 @@ class ChatConnectionManager:
                         await user['userWebSocket'].send_text(jsonString)
             else:
                 await client.send_text("room doesnt exist yet")
-        elif action == 'join':
-            # deny connection if already connected
-            for user in self.users:
-                if user['userWebSocket'] == client:
-                    await client.send_text("Already connected")
-                    return
-
-            roomNumber = data2['roomNumber']
-            userName = data2['userName']
-            # adding user to list
-            dic = {'userWebSocket': client, 'roomNumber': roomNumber,
-                   'userName': userName}
-            self.users.append(dic)
