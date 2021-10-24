@@ -70,7 +70,7 @@ class ChatConnectionManager:
             # broadcasting that the user has joined the room
             message = " joined the room"
             for user in self.users:
-                if user['roomNumber'] == roomNumber:
+                if user['roomNumber'] == roomNumber and user['userWebSocket'] != client:
                     sendDic = {
                         "message": message,
                         "senderName": userName,
