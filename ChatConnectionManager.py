@@ -107,3 +107,29 @@ class ChatConnectionManager:
                         await user['userWebSocket'].send_text(jsonString)
             else:
                 await client.send_text("room doesnt exist yet")
+
+        elif action == 'getConnectedUsers':
+            roomNumberTemp = -1
+
+            # get room number of the sender
+            for user in self.users:
+                if user['userWebSocket'] == client:
+                    roomNumberTemp = user['roomNumber']
+                    break
+
+            if roomNumberTemp == -1:
+                await client.send_text("You are not in any room")
+            else:
+                connectedUsers = []
+                for user in self.users:
+                    if user['roomNumber'] == roomNumberTemp and user['userWebSocket'] != client:
+                        userDic = {
+                            "userName": user['userName'],
+                        }
+                        connectedUsers.append(userDic)
+
+                sendDic = {
+                    "event": "getConnectedUsersEvent",
+                    "users": connectedUsers
+                }
+                await client.send_text(json.dumps(str(sendDic)))
