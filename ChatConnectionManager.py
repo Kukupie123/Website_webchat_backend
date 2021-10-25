@@ -62,8 +62,11 @@ class ChatConnectionManager:
                 "event": "joinedRoomEvent"
             }
             jsonString = str(json.dumps(sendDic))
-            # sending it back to client
-            await client.send_text(jsonString)
+            # sending it back to everyone in the rom
+            for user in self.users:
+                if user['roomNumber'] == roomNumber:
+                    await user["userWebSocket"].send_text(jsonString)
+
 
         elif action == 'message':
             # invalid data start
