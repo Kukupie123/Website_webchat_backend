@@ -107,7 +107,7 @@ class ChatConnectionManager:
             else:
                 connectedUsers = []
                 for user in self.users:
-                    if user['roomNumber'] == roomNumberTemp and user['userWebSocket'] != client:
+                    if user['roomNumber'] == roomNumberTemp:
                         userDic = {
                             "userName": user['userName'],
                         }
@@ -117,4 +117,7 @@ class ChatConnectionManager:
                     "event": "getConnectedUsersEvent",
                     "users": connectedUsers
                 }
-                await client.send_text(json.dumps(str(sendDic)))
+
+                jsonString = str(json.dumps(sendDic))
+
+                await client.send_text(jsonString)
