@@ -8,9 +8,12 @@ ccm = ChatConnectionManager()
 @app.websocket("/")
 async def websocketRoot(ws: WebSocket):
     await ccm.onClientTrigger(clientWebSocket=ws)
-    while True:
-        data = await ws.receive_text()
-        await ccm.broadcastManager(ws, data)
+    try:
+        while True:
+            data = await ws.receive_text()
+            await ccm.broadcastManager(ws, data)
+    except:
+        await ccm.disconnect(ws);
 
 # When client is triggered we need to do these
 # 1. if status is connected we need to add in list

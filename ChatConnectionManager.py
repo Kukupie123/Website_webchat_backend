@@ -124,3 +124,22 @@ class ChatConnectionManager:
                 jsonString = str(json.dumps(sendDic))
 
                 await client.send_text(jsonString)
+
+    async def disconnect(self, client: WebSocket):
+        for user in self.users:
+            if client == user['userWebSocket']:
+                roomNumber = user['roomNumber']
+                self.users.remove(user)
+                sendDic = {
+                    'roomNumber': roomNumber,
+                    'userName': user['userName'],
+                    'status code': 200,
+                    "event": "disconnectedEvent"
+                }
+                jsonString = str(json.dumps(sendDic))
+                # sending it back to everyone in the rom
+                for user in self.users:
+                    if user['roomNumber'] == roomNumber:
+                        await user["userWebSocket"].send_text(jsonString)
+
+                break;
